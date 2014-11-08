@@ -146,6 +146,7 @@ irc_nick_hash_color (const char *nickname)
 {
     unsigned long color;
     const char *ptr_nick;
+    char *nick_lower;
 
     if (!irc_config_nick_colors)
         irc_config_set_nick_colors ();
@@ -153,9 +154,16 @@ irc_nick_hash_color (const char *nickname)
     if (irc_config_num_nick_colors == 0)
         return 0;
 
-    ptr_nick = nickname;
-    color = 0;
+    nick_lower = strdup (nickname);
+    if (nick_lower)
+    {
+        weechat_string_tolower (nick_lower);
+        ptr_nick = nick_lower;
+    }
+    else
+        ptr_nick = nickname;
 
+    color = 0;
     switch (weechat_config_integer (irc_config_look_nick_color_hash))
     {
         case IRC_CONFIG_LOOK_NICK_COLOR_HASH_DJB2:
@@ -177,6 +185,9 @@ irc_nick_hash_color (const char *nickname)
             }
             break;
     }
+
+    if (nick_lower)
+        free (nick_lower);
 
     return (color % irc_config_num_nick_colors);
 }
